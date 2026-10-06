@@ -30,8 +30,12 @@ final class ParserVrp
 
     /**
      * display access-user mac-address X -> velocidade em tempo real, em Mbps.
-     * O NE8000 informa em unidades de 100 bps (Mbps = valor / 10000) e do ponto de vista do
-     * roteador: outbound (saindo do BRAS) = DOWNLOAD do assinante; inbound = UPLOAD.
+     *
+     * O NE8000 (VRP 8.231) informa a media do ultimo minuto em "kbyte/min", com a unidade na
+     * propria linha ("Ipv4 Realtime speed outbound  : 295 kbyte/min"). A unidade e LIDA, nunca
+     * presumida: o addon antigo dividia por 10000 achando que eram 100 bps e mostrava ~27% a menos.
+     * Sentido do ponto de vista do roteador: outbound (saindo do BRAS) = DOWNLOAD do assinante;
+     * inbound = UPLOAD.
      * null = o BRAS nao mostrou o assinante (offline ou MAC de outro equipamento).
      * @return array{usuario:string,ipv4_down:float,ipv4_up:float,ipv6_down:float,ipv6_up:float}|null
      */
@@ -41,7 +45,10 @@ final class ParserVrp
             return null;
         }
         $mbps = function (string $rotulo) use ($saida): float {
-            return preg_match('/' . $rotulo . '\s*:\s*(\d+)/i', $saida, $m) ? round(((float) $m[1]) / 10000, 2) : 0.0;
+            if (!preg_match('/' . $rotulo . '\s*:\s*(\d+(?:\.\d+)?)\s*([A-Za-z\/]*)/i', $saida, $m)) {
+                return 0.0;
+            }
+            return round(self::paraMbps((float) $m[1], $m[2]), 3);
         };
         return [
             'usuario'   => $u[1],
@@ -50,6 +57,25 @@ final class ParserVrp
             'ipv6_down' => $mbps('Ipv6\s+Realtime\s+speed\s+outbound'),
             'ipv6_up'   => $mbps('Ipv6\s+Realtime\s+speed\s+inbound'),
         ];
+    }
+
+    /**
+     * Converte uma taxa do VRP para Mbps (10^6 bit/s). "kbyte" = 1024 bytes, como no resto do VRP.
+     * Sem unidade: o formato antigo, em unidades de 100 bps.
+     */
+    public static function paraMbps(float $valor, string $unidade): float
+    {
+        switch (strtolower(trim($unidade))) {
+            case 'kbyte/min': return $valor * 1024 * 8 / 60 / 1e6;
+            case 'byte/min':  return $valor * 8 / 60 / 1e6;
+            case 'kbyte/s':   return $valor * 1024 * 8 / 1e6;
+            case 'byte/s':    return $valor * 8 / 1e6;
+            case 'kbps':      return $valor / 1000;
+            case 'mbps':      return $valor;
+            case 'bps':       return $valor / 1e6;
+            case '':          return $valor / 10000;
+        }
+        throw new BrasFalha('formato', 'unidade de velocidade desconhecida: ' . $unidade);
     }
 
     /** cut access-user ... -> quantos usuarios o BRAS derrubou ("Totally,1 user has been cut off"). */

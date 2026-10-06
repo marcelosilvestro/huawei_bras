@@ -19,6 +19,8 @@ final class TransporteSsh implements Transporte
     /** Prompt do VRP no fim do buffer. */
     public const PROMPT = '/(?:<[^<>\r\n]{1,64}>|\[[~*]?[^\[\]\r\n]{1,64}\])\s*$/';
     private const MAIS = '/-{2,}\s*More\s*-{2,}/i';
+    /** Pergunta de confirmacao do VRP no fim do buffer: "[Y/N]:" ou "(y/n)[y]:". */
+    public const CONFIRMA = '/(?:\[Y\/N\]|\(y\/n\)\[[yn]\]):\s*$/i';
 
     private string $host;
     private int $porta;
@@ -107,17 +109,30 @@ final class TransporteSsh implements Transporte
         $ssh->write($linha . "\n");
 
         $bruto = '';
-        $padrao = '/(?:' . trim(self::MAIS, '/i') . ')|(?:' . trim(self::PROMPT, '/') . ')/i';
+        $pediuConfirmacao = false;
+        $padrao = '/(?:' . trim(self::MAIS, '/i') . ')|(?:' . trim(self::CONFIRMA, '/i') . ')|(?:' . trim(self::PROMPT, '/') . ')/i';
         for ($voltas = 0; $voltas < 500; $voltas++) {
             $parte = $ssh->read($padrao, \phpseclib3\Net\SSH2::READ_REGEX);
             if ($parte === false || $parte === null) {
                 throw new BrasFalha('queda', 'leitura falhou');
             }
-            $bruto .= (string) $parte;
+            $parte = (string) $parte;
+            $bruto .= $parte;
             if ($ssh->isTimeout()) {
                 throw new BrasFalha('timeout', 'sem prompt apos "' . $linha . '"');
             }
-            if (preg_match(self::MAIS . 'm', (string) $parte) && !preg_match(self::PROMPT, rtrim((string) $parte))) {
+            if (preg_match(self::PROMPT, rtrim($parte))) {
+                break;
+            }
+            // O VRP termina alguns "display" perguntando "Are you sure to display some
+            // information? [Y/N]:" e fica esperando, sem prompt. A resposta e SEMPRE "N": a saida
+            // ja veio, e o addon nunca confirma nada sozinho no roteador.
+            if (preg_match(self::CONFIRMA, rtrim($parte))) {
+                $pediuConfirmacao = true;
+                $ssh->write("N\n");
+                continue;
+            }
+            if (preg_match(self::MAIS . 'm', $parte)) {
                 $ssh->write(' ');
                 continue;
             }
@@ -126,6 +141,9 @@ final class TransporteSsh implements Transporte
         $saida = self::limparSaida($bruto, $linha);
         if (preg_match('/^\s*Error:\s*(.+)$/mi', $saida, $m)) {
             throw new BrasFalha('comando', trim($m[1]));
+        }
+        if ($pediuConfirmacao && !str_starts_with($linha, 'display ')) {
+            throw new BrasFalha('comando', 'o roteador pediu confirmacao para "' . $linha . '" e o addon respondeu N');
         }
         return $saida;
     }
@@ -174,6 +192,9 @@ final class TransporteSsh implements Transporte
                 break;
             }
         }
+        // Pergunta de confirmacao respondida pelo addon ("...[Y/N]:N").
+        $linhas = array_values(array_filter($linhas,
+            fn($l) => !preg_match('/(?:\[Y\/N\]|\(y\/n\)\[[yn]\]):\s*[YN]?\s*$/i', $l)));
         // Prompt final.
         while ($linhas && (trim(end($linhas)) === '' || preg_match(self::PROMPT, trim(end($linhas))))) {
             array_pop($linhas);

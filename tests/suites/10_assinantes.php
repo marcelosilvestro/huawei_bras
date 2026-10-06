@@ -21,8 +21,17 @@ T::suite('Assinantes :: parser de trafego e corte');
 
 $fx = __DIR__ . '/../../lib/Bras/Simulado/fixtures/';
 $tr = ParserVrp::trafego((string) file_get_contents($fx . 'display_access-user_mac-address_0011-2233-4455_no-more.txt'));
-T::igual('trafego: outbound = download, inbound = upload, em Mbps (valor / 10000)',
-    ['joao_teste', 52.3, 1.85, 4.1, 0.15], [$tr['usuario'], $tr['ipv4_down'], $tr['ipv4_up'], $tr['ipv6_down'], $tr['ipv6_up']]);
+T::igual('trafego: outbound = download, inbound = upload; kbyte/min convertido para Mbps',
+    ['joao_teste', 52.292, 1.843, 4.096, 0.15], [$tr['usuario'], $tr['ipv4_down'], $tr['ipv4_up'], $tr['ipv6_down'], $tr['ipv6_up']]);
+T::igual('caso real de producao: 295 kbyte/min = 0,040 Mbps (o addon antigo mostrava 0,030)', 0.04,
+    round(ParserVrp::paraMbps(295, 'kbyte/min'), 3));
+T::igual('formato antigo sem unidade continua aceito (100 bps)', 52.3, ParserVrp::paraMbps(523000, ''));
+T::igual('kbps', 1.5, ParserVrp::paraMbps(1500, 'kbps'));
+T::recusa('unidade desconhecida e erro de formato, nunca um numero inventado', fn() => ParserVrp::paraMbps(1, 'furlong/dia'), 'HWB-ROT-009');
+T::igual('a pergunta [Y/N] respondida sai da saida limpa', "linha 1",
+    TransporteSsh::limparSaida("display x\r\nlinha 1\r\nAre you sure to display some information? [Y/N]:N\r\n<NE-PPPoE>", 'display x'));
+T::certo('a pergunta [Y/N] e reconhecida no fim do buffer',
+    (bool) preg_match(TransporteSsh::CONFIRMA, "  ---\r\nAre you sure to display some information? [Y/N]:"));
 T::igual('trafego sem "User name" = assinante nao encontrado', null, ParserVrp::trafego("Info: no online user.\n"));
 T::igual('corte confirmado', 1, ParserVrp::cortados('  Totally,1 user has been cut off.'));
 T::igual('corte com outra grafia', 2, ParserVrp::cortados('Totally, 2 users have been cut off'));
@@ -102,7 +111,7 @@ T::recusa('login invalido', fn() => AssinanteServico::conexoes("a b"), 'HWB-VAL-
 T::suite('Assinantes :: trafego e corte');
 
 $t = AssinanteServico::trafego('joao_teste');
-T::igual('trafego lido do BRAS da sessao, pelo MAC no formato Huawei', ['0011-2233-4455', 52.3, 'BRAS Sim'], [$t['mac'], $t['ipv4_down'], $t['roteador']]);
+T::igual('trafego lido do BRAS da sessao, pelo MAC no formato Huawei', ['0011-2233-4455', 52.292, 'BRAS Sim'], [$t['mac'], $t['ipv4_down'], $t['roteador']]);
 T::recusa('trafego de assinante offline', fn() => AssinanteServico::trafego('maria'), 'HWB-ASS-002');
 T::recusa('trafego de login sem sessao', fn() => AssinanteServico::trafego('ninguem'), 'HWB-ASS-001');
 T::recusa('sessao num NAS sem roteador cadastrado', fn() => AssinanteServico::trafego('outro_bras'), 'HWB-ASS-003');

@@ -1,18 +1,19 @@
-  ------------------------------------------------------------------------------
-  Basic:
-  User access index             : 41237
+  -------------------------------------------------------------------
+  User access index             : 30724
   State                         : Used
   User name                     : joao_teste
-  Domain name                   : default1
-  User access interface         : Eth-Trunk1.300
   User MAC                      : 0011-2233-4455
   User IP address               : 100.64.10.20
-  User IPv6 address             : 2804:abcd:1::1
-
-  Flow Statistic:
-  Ipv4 Realtime speed inbound   : 18500
-  Ipv4 Realtime speed outbound  : 523000
-  Ipv6 Realtime speed inbound   : 1500
-  Ipv6 Realtime speed outbound  : 41000
-  ------------------------------------------------------------------------------
-  Are you sure to display some information?(y/n)[y]:
+  User Basic IP Type            : ipv4/-/-
+  Idle-cut-data (time,rate,idle): 0 sec, 60 kbyte/min, 0 min 0 sec
+  Ipv4 Realtime speed           : 396500 kbyte/min
+  Ipv4 Realtime speed inbound   : 13500 kbyte/min
+  Ipv4 Realtime speed outbound  : 383000 kbyte/min
+  Ipv6 Realtime speed           : 31100 kbyte/min
+  Ipv6 Realtime speed inbound   : 1100 kbyte/min
+  Ipv6 Realtime speed outbound  : 30000 kbyte/min
+  Flow-Statistic-Up             : Yes
+  Flow-Statistic-Down           : Yes
+  Service-type                  : -
+  -------------------------------------------------------------------
+Are you sure to display some information? [Y/N]:
