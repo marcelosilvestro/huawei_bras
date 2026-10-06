@@ -266,8 +266,7 @@ final class RoteadorServico
                 // 4. Modelo cadastrado x detectado x driver.
                 if ($ident !== null) {
                     $m = DriverVrp::MODELOS[$r['modelo']];
-                    $confere = $ident['modelo'] === '' || stripos(str_replace(' ', '', $ident['modelo']), $r['modelo']) !== false;
-                    if (!$confere) {
+                    if (!DriverVrp::modeloConfere($r['modelo'], $ident['modelo'])) {
                         $etapas[] = self::etapa('modelo', 'aviso', 'O equipamento responde como "' . $ident['modelo'] .
                             '", mas o cadastro diz ' . $m['rotulo'] . '. Confira o cadastro.', microtime(true));
                     } elseif (!$m['validado']) {

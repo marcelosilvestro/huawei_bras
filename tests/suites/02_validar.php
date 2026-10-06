@@ -11,7 +11,7 @@ T::recusa('host vazio', fn() => Validar::host(''), 'HWB-VAL-001');
 T::recusa('host com barra', fn() => Validar::host('bras/../x'), 'HWB-VAL-001');
 T::recusa('host com ponto e virgula', fn() => Validar::host('a;reboot'), 'HWB-VAL-001');
 T::recusa('IPv4 com octeto invalido', fn() => Validar::host('10.0.0.300'), 'HWB-VAL-001');
-T::igual('ip() aceita IP literal', '10.200.255.1', Validar::ip('10.200.255.1'));
+T::igual('ip() aceita IP literal', '198.51.100.1', Validar::ip('198.51.100.1'));
 T::recusa('ip() recusa hostname (radacct guarda IP)', fn() => Validar::ip('bras.local'), 'HWB-VAL-001');
 T::igual('porta valida', 22, Validar::porta('22'));
 T::recusa('porta 0', fn() => Validar::porta('0'), 'HWB-VAL-002');

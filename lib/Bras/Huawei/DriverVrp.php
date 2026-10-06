@@ -22,6 +22,26 @@ final class DriverVrp
         'ME60'   => ['rotulo' => 'Huawei ME60',   'validado' => false],
     ];
 
+    /**
+     * Como cada modelo se apresenta no "display version". O NE8000 responde "NetEngine 8000 M8"
+     * (VRP 8.231, conferido em producao), nunca "NE8000": a comparacao precisa conhecer os dois.
+     */
+    private const NOMES_DETECTADOS = [
+        'NE8000' => '/\b(?:NE\s*8000|NetEngine\s*8000)\b/i',
+        'NE40E'  => '/\b(?:NE\s*40E|NetEngine\s*40E)\b/i',
+        'ME60'   => '/\bME\s*60\b/i',
+    ];
+
+    /** O modelo detectado no equipamento e o do cadastro? Vazio (nao informado) nao e divergencia. */
+    public static function modeloConfere(string $cadastro, string $detectado): bool
+    {
+        if (trim($detectado) === '') {
+            return true;
+        }
+        $padrao = self::NOMES_DETECTADOS[$cadastro] ?? null;
+        return $padrao !== null && (bool) preg_match($padrao, $detectado);
+    }
+
     private Transporte $t;
 
     public function __construct(Transporte $t)

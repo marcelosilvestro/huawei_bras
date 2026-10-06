@@ -6,9 +6,14 @@ T::suite('Parser VRP');
 
 $fx = __DIR__ . '/../../lib/Bras/Simulado/fixtures/';
 $v = ParserVrp::versao((string) file_get_contents($fx . 'display_version.txt'));
-T::igual('versao do VRP', '8.180 (NE8000 V800R012C10SPC300)', $v['versao']);
-T::igual('modelo', 'NE8000 M8', $v['modelo']);
-T::igual('uptime', '120 days, 3 hours, 5 minutes', $v['uptime']);
+T::igual('versao do VRP (saida real do NetEngine 8000 M8)', '8.231 (NetEngine 8000 V800R023C10SPC500)', $v['versao']);
+T::igual('modelo', 'NetEngine 8000 M8', $v['modelo']);
+T::igual('uptime', '72 days, 15 hours, 51 minutes', $v['uptime']);
+T::igual('NetEngine 8000 confere com o cadastro NE8000', true, DriverVrp::modeloConfere('NE8000', 'NetEngine 8000 M8'));
+T::igual('NE8000 escrito curto tambem confere', true, DriverVrp::modeloConfere('NE8000', 'NE8000 F1A'));
+T::igual('NetEngine 40E nao confere com NE8000', false, DriverVrp::modeloConfere('NE8000', 'NetEngine 40E-X8'));
+T::igual('NetEngine 40E confere com o cadastro NE40E', true, DriverVrp::modeloConfere('NE40E', 'NetEngine 40E-X8'));
+T::igual('modelo nao informado nao e divergencia', true, DriverVrp::modeloConfere('ME60', ''));
 T::recusa('saida sem a linha do VRP e erro de formato', fn() => ParserVrp::versao("qualquer coisa\n"), 'HWB-ROT-009');
 
 $semModelo = ParserVrp::versao("VRP (R) software, Version 8.210 (NE8000 V800R022)\n");
@@ -43,7 +48,7 @@ $sim->conectar();
 T::igual('simulado tem nome de equipamento', 'BRAS-SIMULADO', $sim->nomeEquipamento());
 $drv = new DriverVrp($sim);
 $id = $drv->identificar();
-T::igual('driver identifica pelo simulado', ['BRAS-SIMULADO', 'NE8000 M8'], [$id['identificador'], $id['modelo']]);
+T::igual('driver identifica pelo simulado', ['BRAS-SIMULADO', 'NetEngine 8000 M8'], [$id['identificador'], $id['modelo']]);
 T::igual('driver le as sessoes pelo simulado', 812, $drv->sessoesOnline());
 T::igual('so comandos da lista fechada foram enviados', ['display version', 'display access-user online-total'], $sim->historico);
 T::recusa('comando sem saida gravada responde como comando desconhecido', fn() => $sim->executar('reboot'), 'HWB-ROT-015');

@@ -18,7 +18,7 @@ T::igual('sem roteador cadastrado: aviso', 'aviso', $porId['roteadores']['result
 T::igual('sem roteador: NAS nao testavel (nunca "ok" presumido)', 'nao_testavel', $porId['nas']['resultado']);
 
 // Roteador cadastrado mas nunca testado: nao_testavel, com a acao "Testar".
-Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS T', '10.0.0.1', 'u', '10.200.255.9', NOW())");
+Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS T', '10.0.0.1', 'u', '198.51.100.9', NOW())");
 $porId = array_column(Diagnostico::componentes(), null, 'componente');
 T::igual('roteador nunca testado: nao_testavel', 'nao_testavel', $porId['roteadores']['resultado']);
 Db::exec("UPDATE tab_hwb_roteador SET bloqueado_ate = NOW() + INTERVAL 10 MINUTE WHERE nome = 'BRAS T'");

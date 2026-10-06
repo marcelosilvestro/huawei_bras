@@ -26,7 +26,7 @@ final class TransporteOutroNome implements Transporte
 T::suite('Roteador :: cadastro');
 
 $base = ['nome' => 'BRAS Centro', 'modelo' => 'NE8000', 'protocolo' => 'ssh', 'host' => '10.0.0.1', 'porta' => '22',
-         'usuario' => 'addon', 'senha' => 'SenhaBras#9', 'nas_ip' => '10.200.255.1', 'timeout_conexao_s' => '5',
+         'usuario' => 'addon', 'senha' => 'SenhaBras#9', 'nas_ip' => '198.51.100.1', 'timeout_conexao_s' => '5',
          'timeout_comando_s' => '10', 'observacao' => 'teste'];
 
 T::recusa('roteador SSH novo sem senha e recusado', fn() => RoteadorServico::salvar(['senha' => ''] + $base, 'teste'), 'HWB-ROT-003');
@@ -38,7 +38,7 @@ $r = RoteadorServico::salvar($base, 'teste');
 T::certo('roteador criado', $r['id'] > 0 && $r['nome'] === 'BRAS Centro');
 T::igual('tela recebe so "tem senha", nunca a senha', [true, false], [$r['tem_senha'], array_key_exists('senha', $r)]);
 T::igual('senha foi para o cofre', 'SenhaBras#9', Cofre::ler('roteador', $r['id']));
-T::recusa('mesmo nome de novo', fn() => RoteadorServico::salvar(['nas_ip' => '10.200.255.2'] + $base, 'teste'), 'HWB-ROT-002');
+T::recusa('mesmo nome de novo', fn() => RoteadorServico::salvar(['nas_ip' => '198.51.100.2'] + $base, 'teste'), 'HWB-ROT-002');
 T::recusa('mesmo NAS em outro roteador', fn() => RoteadorServico::salvar(['nome' => 'Outro'] + $base, 'teste'), 'HWB-ROT-004');
 
 $alt = RoteadorServico::salvar(['id' => $r['id'], 'versao' => $r['versao'], 'senha' => '', 'observacao' => 'alterado'] + $base, 'teste');
@@ -51,14 +51,14 @@ T::certo('criacao auditada sem a senha', $aud !== null && !str_contains((string)
 
 T::suite('Roteador :: teste de acesso (simulado)');
 
-$sim = RoteadorServico::salvar(['nome' => 'BRAS Demo', 'protocolo' => 'simulado', 'nas_ip' => '10.200.255.5', 'senha' => ''] + $base, 'teste');
+$sim = RoteadorServico::salvar(['nome' => 'BRAS Demo', 'protocolo' => 'simulado', 'nas_ip' => '198.51.100.5', 'senha' => ''] + $base, 'teste');
 T::igual('simulado nao precisa de senha nem host', ['simulado', false], [$sim['host'], $sim['tem_senha']]);
 $t = RoteadorServico::testar($sim['id'], 'teste');
 $etapas = array_column($t['etapas'], 'resultado', 'etapa');
 T::igual('etapas do teste simulado', ['login' => 'ok', 'identificacao' => 'ok', 'modelo' => 'ok', 'sessoes' => 'ok', 'radius' => 'nao_testavel'], $etapas);
 T::igual('resultado geral ok (nao_testavel nao rebaixa)', 'ok', $t['resultado']);
 T::igual('sessoes lidas', 812, $t['sessoes']);
-T::igual('cadastro guardou o que foi detectado', ['BRAS-SIMULADO', 'NE8000 M8', 812],
+T::igual('cadastro guardou o que foi detectado', ['BRAS-SIMULADO', 'NetEngine 8000 M8', 812],
     [$t['roteador']['identificador_detectado'], $t['roteador']['modelo_detectado'], $t['roteador']['sessoes_detectadas']]);
 T::igual('historico agrupa o teste', 1, count(RoteadorServico::historicoTestes($sim['id'])));
 
@@ -66,7 +66,7 @@ $t2 = RoteadorServico::testar($sim['id'], 'teste', new TransporteOutroNome());
 T::igual('outro equipamento no mesmo endereco: aviso de identidade', 'aviso',
     array_column($t2['etapas'], 'resultado', 'etapa')['identidade'] ?? null);
 
-$ne40 = RoteadorServico::salvar(['nome' => 'BRAS NE40', 'modelo' => 'NE40E', 'protocolo' => 'simulado', 'nas_ip' => '10.200.255.6', 'senha' => ''] + $base, 'teste');
+$ne40 = RoteadorServico::salvar(['nome' => 'BRAS NE40', 'modelo' => 'NE40E', 'protocolo' => 'simulado', 'nas_ip' => '198.51.100.6', 'senha' => ''] + $base, 'teste');
 $t3 = RoteadorServico::testar($ne40['id'], 'teste');
 T::igual('cadastro diz NE40E e o equipamento responde NE8000: aviso', 'aviso', array_column($t3['etapas'], 'resultado', 'etapa')['modelo']);
 

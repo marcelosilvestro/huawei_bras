@@ -5,9 +5,9 @@ com os espaços trocados por `_` (ex.: `display version` → `display_version.tx
 
 O prompt do equipamento simulado é `<BRAS-SIMULADO>`.
 
-> **Atenção:** as saídas de `display version` e `display access-user online-total` foram montadas
-> a partir da documentação do VRP, **não** de um NE8000 real. Troque-as pelas saídas reais assim que
-> houver um teste em produção. Os testes do parser usam estes arquivos.
+> **Atenção:** a saída de `display access-user online-total` foi montada
+> a partir da documentação do VRP, **não** de um NE8000 real. O formato foi conferido em produção pelo
+> teste de acesso (795 assinantes lidos). `display version` é a saída real de um NetEngine 8000 M8 (VRP 8.231), resumida.
 
 Tráfego e corte usam o MAC de teste `0011-2233-4455`. O FORMATO dessas duas saídas é o real do
 NE8000 (VRP 8.231), conferido em produção em 06/10/2026: velocidade em `kbyte/min` com a unidade na

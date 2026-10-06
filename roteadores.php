@@ -23,6 +23,7 @@ $hwb_pode = $hwb_schema_ok && Permissao::tem('roteador.configurar');
         <div class="lc-section-header">
             <span class="lc-section-title"><i class="bi bi-router"></i> Roteadores cadastrados <span class="lc-badge-count" id="hwb-total">0</span></span>
             <div class="hwb-acoes">
+                <button type="button" class="lc-btn-outline" id="btn-guia"><i class="bi bi-terminal"></i> Preparar o roteador</button>
                 <?php if ($hwb_pode): ?>
                 <button type="button" class="lc-btn-black" id="btn-novo"><i class="bi bi-plus-lg"></i> Novo roteador</button>
                 <?php endif; ?>
@@ -87,6 +88,78 @@ $hwb_pode = $hwb_schema_ok && Permissao::tem('roteador.configurar');
         <div class="lc-modal-body" id="teste-corpo"></div>
         <div class="lc-modal-footer">
             <button type="button" class="lc-btn-cancel" onclick="HWB.fecharModal('modal-teste')">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<div class="lc-overlay" id="modal-guia" onclick="HWB.fecharSeFora(event, 'modal-guia')">
+    <div class="lc-modal-box lg">
+        <div class="lc-modal-header lc-modal-header-dark">
+            <span class="lc-modal-title"><i class="bi bi-terminal"></i> Preparar o roteador Huawei (VRP 8)</span>
+            <button type="button" class="lc-modal-close" onclick="HWB.fecharModal('modal-guia')">&times;</button>
+        </div>
+        <div class="lc-modal-body hwb-guia">
+            <p class="hwb-sub">Comandos para colar na CLI do BRAS (NE8000 e família VRP 8), conectado como administrador.
+                Preencha os campos abaixo: os comandos se ajustam sozinhos. A senha <strong>nunca</strong> passa por esta tela —
+                troque <span class="hwb-mono">SENHA_FORTE</span> no próprio roteador.</p>
+            <div class="hwb-form-2">
+                <div><label class="lc-label">Usuário do addon no roteador</label>
+                    <input class="lc-input" id="g-usuario" maxlength="60" value="mkauth">
+                    <div class="lc-input-hint">Exclusivo do addon. Não use o usuário de administração.</div></div>
+                <div><label class="lc-label">IP do MK-AUTH visto pelo roteador</label>
+                    <input class="lc-input" id="g-ip" maxlength="45" value="<?= hwb_h($_SERVER['SERVER_ADDR'] ?? '') ?>">
+                    <div class="lc-input-hint">O endereço de origem do SSH do MK-AUTH até o BRAS.</div></div>
+                <div class="span2"><label class="lc-label">ACL que já protege o SSH/VTY do roteador (se houver)</label>
+                    <input class="lc-input" id="g-acl" maxlength="60" placeholder="ex.: ACL-GERENCIA">
+                    <div class="lc-input-hint">Descubra no passo 1. Deixe em branco se o roteador não usa ACL no SSH.</div></div>
+            </div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">1</span><div>
+                <strong>Conferir o que já existe</strong> <span class="hwb-sub">(só leitura)</span>
+                <div class="hwb-sub">Mostra as ACLs aplicadas ao SSH e às VTYs e o IP de origem do RADIUS (usado no passo 6).</div>
+                <pre class="hwb-cmd" data-cmd="ver"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">2</span><div>
+                <strong>Usuário local exclusivo do addon</strong>
+                <div class="hwb-sub">Nível 3 é o necessário para o corte de sessão (<span class="hwb-mono">cut access-user</span>), o nível validado em produção.
+                    O bloqueio após 3 senhas erradas protege a conta.</div>
+                <pre class="hwb-cmd" data-cmd="usuario"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">3</span><div>
+                <strong>SSH para esse usuário</strong>
+                <pre class="hwb-cmd" data-cmd="ssh"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">4</span><div>
+                <strong>Liberar o IP do MK-AUTH na ACL existente</strong>
+                <div class="hwb-aviso" style="margin:6px 0"><i class="bi bi-exclamation-triangle"></i>
+                    <div>Não aplique uma ACL <strong>nova</strong> nas VTYs ou no SSH sem incluir o seu próprio IP: você perde o acesso ao roteador.
+                        Acrescente o MK-AUTH à ACL que já existe (passo 1). Se ela tiver uma regra <span class="hwb-mono">deny</span> no fim,
+                        use um número de regra <strong>menor</strong> que o dela.</div></div>
+                <pre class="hwb-cmd" data-cmd="acl"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">5</span><div>
+                <strong>Gravar</strong>
+                <div class="hwb-sub">No VRP 8 a configuração só vale depois do <span class="hwb-mono">commit</span>; o <span class="hwb-mono">save</span> a mantém após reiniciar (responda <span class="hwb-mono">y</span>).</div>
+                <pre class="hwb-cmd" data-cmd="gravar"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">6</span><div>
+                <strong>NAS no RADIUS e accounting</strong>
+                <ul class="hwb-lista">
+                    <li>O IP da interface de <span class="hwb-mono">radius-server source</span> (passo 1) é o IP com que o BRAS aparece no RADIUS.
+                        Ele precisa estar cadastrado como NAS no MK-AUTH e é o que você escolhe em <strong>NAS no RADIUS</strong> no cadastro do roteador.</li>
+                    <li>O esquema de accounting do domínio PPPoE precisa enviar <strong>interim</strong>: sem ele a sessão fica com tempo zero e o addon
+                        mostra o assinante como offline. Confira com o comando abaixo (o valor é em minutos).</li>
+                </ul>
+                <pre class="hwb-cmd" data-cmd="radius"></pre></div></div>
+
+            <div class="hwb-guia-passo"><span class="hwb-passo-num">7</span><div>
+                <strong>Cadastrar e testar</strong>
+                <div class="hwb-sub">Feche esta janela, use <strong>Novo roteador</strong> com o usuário e a senha criados e clique em <strong>Testar</strong>.
+                    Depois do teste, o comando abaixo mostra a sessão do addon no roteador.</div>
+                <pre class="hwb-cmd" data-cmd="conferir"></pre></div></div>
+        </div>
+        <div class="lc-modal-footer">
+            <button type="button" class="lc-btn-cancel" onclick="HWB.fecharModal('modal-guia')">Fechar</button>
         </div>
     </div>
 </div>
@@ -259,8 +332,72 @@ $hwb_pode = $hwb_schema_ok && Permissao::tem('roteador.configurar');
             });
     }
 
+    // ------------------------------------------------------------ guia de preparo do roteador
+    function comandosGuia() {
+        var u = $.trim($('#g-usuario').val()) || 'USUARIO_DO_ADDON';
+        var ip = $.trim($('#g-ip').val()) || 'IP_DO_MKAUTH';
+        var acl = $.trim($('#g-acl').val());
+        return {
+            ver: ['display current-configuration | include acl',
+                  'display current-configuration configuration user-interface',
+                  'display current-configuration | include radius-server source'],
+            usuario: ['system-view', 'aaa',
+                      ' local-user ' + u + ' password irreversible-cipher SENHA_FORTE',
+                      ' local-user ' + u + ' service-type ssh',
+                      ' local-user ' + u + ' level 3',
+                      ' local-user ' + u + ' state block fail-times 3 interval 5',
+                      ' quit'],
+            ssh: ['stelnet server enable',
+                  'ssh user ' + u,
+                  'ssh user ' + u + ' authentication-type password',
+                  'ssh user ' + u + ' service-type stelnet',
+                  'ssh authorization-type default aaa'],
+            acl: acl ? ['acl name ' + acl,
+                        ' rule NUMERO_LIVRE permit source ' + ip + ' 0',
+                        ' quit']
+                     : ['# Sem ACL no SSH/VTY: nada a fazer neste passo.',
+                        '# Recomendado: restringir o SSH a quem administra o roteador E ao IP do MK-AUTH (' + ip + ').'],
+            gravar: ['commit', 'return', 'save'],
+            radius: ['display current-configuration | include interim'],
+            conferir: ['display users', 'display ssh user-information ' + u]
+        };
+    }
+
+    function renderGuia() {
+        var c = comandosGuia();
+        $('#modal-guia pre.hwb-cmd').each(function () {
+            var linhas = c[$(this).attr('data-cmd')] || [];
+            $(this).html('<button type="button" class="lc-btn-outline hwb-copiar" title="Copiar"><i class="bi bi-clipboard"></i> Copiar</button>' +
+                '<code>' + HWB.esc(linhas.join('\n')) + '</code>');
+        });
+    }
+
+    /** Copia texto. O painel roda em HTTP, onde navigator.clipboard nao existe: cai no execCommand. */
+    function copiar(texto) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(texto);
+        }
+        return new Promise(function (ok, falha) {
+            var t = document.createElement('textarea');
+            t.value = texto;
+            t.setAttribute('readonly', '');
+            t.style.position = 'fixed'; t.style.opacity = '0';
+            document.body.appendChild(t);
+            t.select();
+            try { document.execCommand('copy') ? ok() : falha(); } catch (e) { falha(e); }
+            t.remove();
+        });
+    }
+
     $(function () {
         carregar();
+        $('#btn-guia').on('click', function () { renderGuia(); HWB.abrirModal('modal-guia'); });
+        $('#g-usuario, #g-ip, #g-acl').on('input', renderGuia);
+        $('#modal-guia').on('click', '.hwb-copiar', function () {
+            var texto = $(this).siblings('code').text();
+            copiar(texto).then(function () { HWB.toast('ok', 'Comandos copiados.'); },
+                               function () { HWB.toast('avis', 'Não consegui copiar: selecione o texto e use Ctrl+C.'); });
+        });
         $('#btn-novo').on('click', function () { abrirForm(null); });
         $('#btn-salvar').on('click', salvar);
         $('#f-protocolo').on('change', function () { $('#f-porta').val(''); ajustarProtocolo(); });

@@ -29,7 +29,7 @@ T::igual('formato antigo sem unidade continua aceito (100 bps)', 52.3, ParserVrp
 T::igual('kbps', 1.5, ParserVrp::paraMbps(1500, 'kbps'));
 T::recusa('unidade desconhecida e erro de formato, nunca um numero inventado', fn() => ParserVrp::paraMbps(1, 'furlong/dia'), 'HWB-ROT-009');
 T::igual('a pergunta [Y/N] respondida sai da saida limpa', "linha 1",
-    TransporteSsh::limparSaida("display x\r\nlinha 1\r\nAre you sure to display some information? [Y/N]:N\r\n<NE-PPPoE>", 'display x'));
+    TransporteSsh::limparSaida("display x\r\nlinha 1\r\nAre you sure to display some information? [Y/N]:N\r\n<BRAS-01>", 'display x'));
 T::certo('a pergunta [Y/N] e reconhecida no fim do buffer',
     (bool) preg_match(TransporteSsh::CONFIRMA, "  ---\r\nAre you sure to display some information? [Y/N]:"));
 T::igual('trafego sem "User name" = assinante nao encontrado', null, ParserVrp::trafego("Info: no online user.\n"));
@@ -51,28 +51,28 @@ Db::exec("CREATE TABLE radacct (radacctid BIGINT AUTO_INCREMENT PRIMARY KEY, use
           KEY username (username), KEY nasipaddress (nasipaddress)) CHARSET=latin1");
 Db::tabelaExiste(Db::ESQUECER);
 
-Db::exec("INSERT INTO nas (nasname, shortname, senha) VALUES ('10.200.255.1', 'NE8000', 'segredo-do-nas'), ('10.200.255.2', 'Outro', 'x')");
+Db::exec("INSERT INTO nas (nasname, shortname, senha) VALUES ('198.51.100.1', 'NE8000', 'segredo-do-nas'), ('198.51.100.2', 'Outro', 'x')");
 Db::exec("INSERT INTO sis_cliente VALUES ('joao_teste', 'João da Silva', 'nao', 's'), ('maria', 'Maria Souza', 'sim', 's'),
           ('pedro', 'Pedro', 'nao', 's'), ('inativo', 'Ex-cliente', 'nao', 'n'), ('outro_bras', 'Outro', 'nao', 's')");
 Db::exec("INSERT INTO sis_adicional VALUES ('joao_loja', 'joao_teste', '', 'nao')");
 $s = "INSERT INTO radacct (username, nasipaddress, nasportid, acctstarttime, acctstoptime, acctsessiontime, acctinputoctets,
       acctoutputoctets, callingstationid, framedipaddress, acctterminatecause) VALUES ";
 // joao: sessao antiga encerrada + sessao atual aberta (so a ULTIMA conta)
-Db::exec($s . "('joao_teste', '10.200.255.1', 'eth1', NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY, 86400, 10, 20, '00:11:22:33:44:55', '100.64.10.20', 'Lost-Carrier'),
-                ('joao_teste', '10.200.255.1', 'eth1', NOW() - INTERVAL 1 HOUR, NULL, 3600, 1000, 5000, '00:11:22:33:44:55', '100.64.10.20', NULL),
-                ('maria', '10.200.255.1', 'eth2', NOW() - INTERVAL 3 HOUR, NOW() - INTERVAL 1 HOUR, 7200, 1, 2, 'AA:BB:CC:00:00:01', '100.64.10.21', 'User-Request'),
-                ('pedro', '10.200.255.1', 'eth3', NOW(), NULL, 0, 0, 0, 'AA:BB:CC:00:00:02', '100.64.10.22', NULL),
-                ('inativo', '10.200.255.1', 'eth4', NOW(), NULL, 50, 0, 0, 'AA:BB:CC:00:00:03', '100.64.10.23', NULL),
-                ('joao_loja', '10.200.255.1', 'eth5', NOW(), NULL, 60, 0, 0, 'AA:BB:CC:00:00:04', '100.64.10.24', NULL),
-                ('outro_bras', '10.200.255.2', 'eth6', NOW(), NULL, 60, 0, 0, 'AA:BB:CC:00:00:05', '100.64.10.25', NULL)");
+Db::exec($s . "('joao_teste', '198.51.100.1', 'eth1', NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY, 86400, 10, 20, '00:11:22:33:44:55', '100.64.10.20', 'Lost-Carrier'),
+                ('joao_teste', '198.51.100.1', 'eth1', NOW() - INTERVAL 1 HOUR, NULL, 3600, 1000, 5000, '00:11:22:33:44:55', '100.64.10.20', NULL),
+                ('maria', '198.51.100.1', 'eth2', NOW() - INTERVAL 3 HOUR, NOW() - INTERVAL 1 HOUR, 7200, 1, 2, 'AA:BB:CC:00:00:01', '100.64.10.21', 'User-Request'),
+                ('pedro', '198.51.100.1', 'eth3', NOW(), NULL, 0, 0, 0, 'AA:BB:CC:00:00:02', '100.64.10.22', NULL),
+                ('inativo', '198.51.100.1', 'eth4', NOW(), NULL, 50, 0, 0, 'AA:BB:CC:00:00:03', '100.64.10.23', NULL),
+                ('joao_loja', '198.51.100.1', 'eth5', NOW(), NULL, 60, 0, 0, 'AA:BB:CC:00:00:04', '100.64.10.24', NULL),
+                ('outro_bras', '198.51.100.2', 'eth6', NOW(), NULL, 60, 0, 0, 'AA:BB:CC:00:00:05', '100.64.10.25', NULL)");
 
 $base = ['modelo' => 'NE8000', 'protocolo' => 'simulado', 'host' => '', 'porta' => '22', 'usuario' => '', 'senha' => '',
          'timeout_conexao_s' => '5', 'timeout_comando_s' => '10', 'observacao' => ''];
 T::recusa('NAS que nao existe no MK-AUTH e recusado', fn() => RoteadorServico::salvar(['nome' => 'X', 'nas_ip' => '10.9.9.9'] + $base, 'teste'), 'HWB-ROT-010');
-$rot = RoteadorServico::salvar(['nome' => 'BRAS Sim', 'nas_ip' => '10.200.255.1'] + $base, 'teste');
+$rot = RoteadorServico::salvar(['nome' => 'BRAS Sim', 'nas_ip' => '198.51.100.1'] + $base, 'teste');
 
 $nas = RoteadorServico::nasDisponiveis();
-T::igual('NAS do MK-AUTH listados, com o dono', ['10.200.255.1' => 'BRAS Sim', '10.200.255.2' => null], array_column($nas, 'roteador', 'ip'));
+T::igual('NAS do MK-AUTH listados, com o dono', ['198.51.100.1' => 'BRAS Sim', '198.51.100.2' => null], array_column($nas, 'roteador', 'ip'));
 T::certo('a senha do NAS nunca sai da tabela nas', !str_contains(json_encode($nas), 'segredo-do-nas'));
 
 $l = AssinanteServico::listar([], 1, 50);

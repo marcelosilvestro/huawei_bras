@@ -32,12 +32,14 @@ O instalador:
 ## Primeiros passos
 
 1. Abra o addon e clique em **Assumir administração**.
-2. Em **Roteadores**, cadastre o BRAS: endereço de gerência SSH, usuário, senha e o **NAS no RADIUS**
+2. Em **Roteadores › Preparar o roteador**, siga o passo a passo com os comandos para colar no BRAS
+   (usuário exclusivo do addon, SSH, liberação do IP do MK-AUTH na ACL, commit e conferência do RADIUS).
+3. Em **Roteadores**, cadastre o BRAS: endereço de gerência SSH, usuário, senha e o **NAS no RADIUS**
    (o IP com que o BRAS aparece no cadastro de NAS do MK-AUTH; é ele que separa os assinantes de
    cada roteador).
-3. Clique em **Testar**. O teste só **lê** o equipamento: faz login e consulta `display version` e
+4. Clique em **Testar**. O teste só **lê** o equipamento: faz login e consulta `display version` e
    `display access-user online-total`.
-4. Em **Configurações › Permissões**, libere os operadores: quem só consulta, quem pode derrubar
+5. Em **Configurações › Permissões**, libere os operadores: quem só consulta, quem pode derrubar
    sessão e quem configura roteador.
 
 Use no BRAS um usuário dedicado ao addon, com acesso só de consulta e de corte de assinante.

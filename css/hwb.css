@@ -611,6 +611,17 @@ a.lc-btn-outline { text-decoration: none; display: inline-flex; align-items: cen
 .hwb-trafego-valor.down { color: #3266ad; }
 .hwb-trafego-valor.up { color: #1d9e75; }
 .hwb-grafico { position: relative; height: 260px; }
+
+/* ---- Guia de preparo do roteador ---- */
+.hwb-guia-passo { display: flex; gap: 10px; align-items: flex-start; padding: 12px 0; border-top: 1px solid #eef0f4; }
+.hwb-guia-passo:first-of-type { margin-top: 12px; }
+.hwb-guia-passo > div { flex: 1; min-width: 0; }
+pre.hwb-cmd { position: relative; background: #111827; color: #e5e7eb; border-radius: 8px; padding: 10px 12px; margin: 8px 0 0;
+              font-family: Consolas, 'Courier New', monospace; font-size: 12px; line-height: 1.5; white-space: pre; overflow-x: auto; }
+pre.hwb-cmd code { font-family: inherit; color: inherit; background: none; padding: 0; }
+pre.hwb-cmd .hwb-copiar { position: absolute; top: 6px; right: 6px; height: 24px; padding: 0 8px; font-size: 11px;
+                          background: #1f2937; color: #e5e7eb; border-color: #374151; }
+pre.hwb-cmd .hwb-copiar:hover { background: #374151; }
 /* ---- Responsividade (mesmo esquema de prioridade do Livro Caixa) ---- */
 @media (max-width: 992px) { .prio-8 { display: none; } }
 @media (max-width: 850px) { .prio-7 { display: none; } }

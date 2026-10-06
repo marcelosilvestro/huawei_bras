@@ -31,12 +31,12 @@ T::igual('todas as tabelas InnoDB/utf8mb4', [], $ruins);
 
 T::suite('Schema :: travas de integridade');
 
-Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS A', '10.0.0.1', 'u', '10.200.255.1', NOW())");
+Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS A', '10.0.0.1', 'u', '198.51.100.1', NOW())");
 T::recusa('dois roteadores com o mesmo nome', function () {
-    Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS A', '10.0.0.2', 'u', '10.200.255.2', NOW())");
+    Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS A', '10.0.0.2', 'u', '198.51.100.2', NOW())");
 });
 T::recusa('dois roteadores no mesmo NAS (a lista de assinantes ficaria duplicada)', function () {
-    Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS B', '10.0.0.2', 'u', '10.200.255.1', NOW())");
+    Db::exec("INSERT INTO tab_hwb_roteador (nome, host, usuario, nas_ip, criado_em) VALUES ('BRAS B', '10.0.0.2', 'u', '198.51.100.1', NOW())");
 });
 $padrao = Db::um("SELECT protocolo, porta, modelo FROM tab_hwb_roteador WHERE nome = 'BRAS A'");
 T::igual('roteador nasce ssh, porta 22, NE8000', ['ssh', 22, 'NE8000'],
