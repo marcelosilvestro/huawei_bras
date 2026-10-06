@@ -1,0 +1,9 @@
+  ------------------------------------------------------------------
+  Total users                      : 812
+  IPv4 users                       : 812
+  IPv6 users                       : 655
+  Dual-Stack users                 : 655
+  Wait authen-ack                  : 0
+  Authentication success           : 812
+  Accounting ready                 : 812
+  ------------------------------------------------------------------

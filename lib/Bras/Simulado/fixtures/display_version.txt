@@ -1,0 +1,9 @@
+Huawei Versatile Routing Platform Software
+VRP (R) software, Version 8.180 (NE8000 V800R012C10SPC300)
+Copyright (C) 2012-2020 Huawei Technologies Co., Ltd.
+HUAWEI NE8000 M8 uptime is 120 days, 3 hours, 5 minutes
+
+NE8000 M8 version information:
+- BKP 1 version information:
+  PCB         Version : CR57BKPM REV A
+  MPU(Master) 9 : uptime is 120 days, 3 hours, 5 minutes
