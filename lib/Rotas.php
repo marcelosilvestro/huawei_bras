@@ -34,5 +34,12 @@ final class Rotas
         'roteador.testar'         => ['POST', 'roteador.configurar', ['AjaxRoteador', 'testar']],
         'roteador.ativar'         => ['POST', 'roteador.configurar', ['AjaxRoteador', 'ativar']],
         'roteador.remover'        => ['POST', 'roteador.configurar', ['AjaxRoteador', 'remover']],
+
+        'assinante.listar'        => ['GET',  'ver',                 ['AjaxAssinante', 'listar']],
+        'assinante.conexoes'      => ['GET',  'ver',                 ['AjaxAssinante', 'conexoes']],
+        'assinante.fabricante'    => ['GET',  'ver',                 ['AjaxAssinante', 'fabricante']],
+        // Le o BRAS por SSH: POST (com CSRF) para que um link de fora nao dispare logins no roteador.
+        'assinante.trafego'       => ['POST', 'ver',                 ['AjaxAssinante', 'trafego']],
+        'assinante.derrubar'      => ['POST', 'assinante.derrubar',  ['AjaxAssinante', 'derrubar']],
     ];
 }

@@ -4,8 +4,8 @@ Monitora os assinantes PPPoE autenticados nos BRAS **Huawei** (NE8000 e família
 do MK-AUTH: quem está online, o histórico de conexões, o tráfego em tempo real e o corte de sessão
 (CoA), com permissões por operador e auditoria.
 
-> **Estado:** em desenvolvimento. A versão atual entrega o cadastro e o teste dos roteadores; a lista
-> de assinantes, o tráfego e o corte de sessão chegam nas próximas versões.
+> **Estado:** em desenvolvimento. Cadastro e teste de roteadores, lista de assinantes, histórico de
+> conexões, tráfego em tempo real, corte de sessão e exportação CSV já funcionam.
 
 ## Instalação
 
@@ -64,6 +64,7 @@ em produção.
 ## Bibliotecas de terceiros
 
 - [phpseclib](https://phpseclib.com) 3.0.42 (MIT), em `vendor/`, para o SSH com o roteador.
+- [Chart.js](https://www.chartjs.org) 4.4.1 (MIT), em `js/vendor/`, para o gráfico de tráfego.
 
 ## Licença
 

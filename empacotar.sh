@@ -47,7 +47,7 @@ done
 for obrigatorio in manifest.json config.php ajax.php index.php roteadores.php instalar.sh lib/Core/carregar.php \
                    lib/Core/Schema.php lib/Core/Cofre.php lib/Bras/TransporteSsh.php sql/baseline.sql \
                    cli/schema.php cli/diagnostico.php cli/cofre.php nav/header.php css/hwb.css js/hwb-ui.js \
-                   vendor/autoload.php radius/huawei.php; do
+                   vendor/autoload.php radius/huawei.php exportar.php js/vendor/chart.umd.min.js; do
     if [ ! -e "$DESTINO/staging/$obrigatorio" ]; then
         echo "ERRO: falta $obrigatorio no pacote"; exit 1
     fi

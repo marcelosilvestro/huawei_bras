@@ -595,6 +595,22 @@ a.hwb-aba.ativa:hover { background: #000; color: #fff; }
 }
 .lc-input-date.w200 { width: 200px; }
 
+
+/* ---- Assinantes ---- */
+.hwb-btn-ico { width: 30px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.hwb-btn-ico:disabled { opacity: .35; cursor: default; }
+.hwb-btn-ico.perigo { color: #c0392b; }
+.hwb-tag { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 5px; background: #eef4fc; color: #3266ad; vertical-align: middle; }
+.hwb-link { color: #3266ad; cursor: pointer; text-decoration: none; }
+.hwb-link:hover { text-decoration: underline; }
+a.lc-btn-outline { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.hwb-dir { margin-left: auto; }
+.hwb-trafego-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.hwb-trafego-card { border: 1px solid #eef0f4; border-radius: 8px; padding: 8px 12px; }
+.hwb-trafego-valor { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hwb-trafego-valor.down { color: #3266ad; }
+.hwb-trafego-valor.up { color: #1d9e75; }
+.hwb-grafico { position: relative; height: 260px; }
 /* ---- Responsividade (mesmo esquema de prioridade do Livro Caixa) ---- */
 @media (max-width: 992px) { .prio-8 { display: none; } }
 @media (max-width: 850px) { .prio-7 { display: none; } }

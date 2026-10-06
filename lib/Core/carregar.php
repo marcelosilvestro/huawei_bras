@@ -17,6 +17,7 @@ require_once __DIR__ . '/Schema.php';
 require_once __DIR__ . '/../Diag/PreRequisitos.php';
 require_once __DIR__ . '/../Diag/Diagnostico.php';
 require_once __DIR__ . '/../Bras/RoteadorServico.php';
+require_once __DIR__ . '/../Assinantes/AssinanteServico.php';
 
 if (!defined('HWB_DIR_LOGS')) {
     define('HWB_DIR_LOGS', '/opt/mk-auth/log/huawei_bras');

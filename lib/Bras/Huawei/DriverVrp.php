@@ -4,7 +4,8 @@
  *
  * Toda linha enviada ao roteador nasce aqui, de uma lista fechada. Nenhum texto digitado na
  * tela chega a CLI sem passar por um metodo deste arquivo (e pela validacao do Validar).
- * Nesta versao o driver so LE; o corte de assinante entra na tela de assinantes.
+ * A unica operacao que altera o BRAS e cortarPorMac(), chamada so pela tela de assinantes,
+ * com o papel assinante.derrubar, confirmacao e auditoria.
  */
 require_once __DIR__ . '/../Transporte.php';
 require_once __DIR__ . '/Parser.php';
@@ -39,6 +40,43 @@ final class DriverVrp
     public function sessoesOnline(): ?int
     {
         return ParserVrp::totalUsuarios($this->t->executar('display access-user online-total'));
+    }
+
+    /** Velocidade em tempo real do assinante pelo MAC (null = o BRAS nao o mostrou). */
+    public function trafegoPorMac(string $macHuawei): ?array
+    {
+        $mac = self::exigirMac($macHuawei);
+        return ParserVrp::trafego($this->t->executar('display access-user mac-address ' . $mac . ' | no-more'));
+    }
+
+    /**
+     * Derruba a sessao do assinante pelo MAC (o mesmo caminho do addon antigo, validado em
+     * producao): system-view -> aaa -> cut access-user mac-address. Volta para a visao de
+     * usuario no fim. Devolve quantos usuarios o BRAS informou ter derrubado (null = resposta
+     * nao reconhecida) e a saida, para a auditoria.
+     * @return array{cortados:?int,saida:string}
+     */
+    public function cortarPorMac(string $macHuawei): array
+    {
+        $mac = self::exigirMac($macHuawei);
+        $this->t->executar('system-view');
+        $this->t->executar('aaa');
+        $saida = $this->t->executar('cut access-user mac-address ' . $mac);
+        try {
+            $this->t->executar('return');
+        } catch (BrasFalha $f) {
+            // A sessao fecha logo depois; nao voltar para a visao de usuario nao e problema.
+        }
+        return ['cortados' => ParserVrp::cortados($saida), 'saida' => $saida];
+    }
+
+    /** Ultima barreira: so MAC no formato do Huawei chega a CLI. */
+    private static function exigirMac(string $mac): string
+    {
+        if (!preg_match('/^[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}$/', $mac)) {
+            throw new InvalidArgumentException('MAC fora do formato do Huawei.');
+        }
+        return $mac;
     }
 
     /** @return array<int,array{id:string,rotulo:string,validado:bool}> */
